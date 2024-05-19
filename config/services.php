@@ -31,4 +31,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'printers' => [
+        'kitchen' => env('KITCHEN_PRINTER_IP'),
+        'desk' => env('DESK_PRINTER_IP'),
+    ],
 ];

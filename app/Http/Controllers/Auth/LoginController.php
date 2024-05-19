@@ -54,7 +54,7 @@ class LoginController extends Controller
 
         $credential=[
             'email'=> $request->email,
-            'password'=> "12345678"
+            'password'=> $request->password
         ];
         $user = User::where('email',$request->email)->first();
         if($user){
@@ -64,7 +64,7 @@ class LoginController extends Controller
                 return redirect()->back()->with($notification);
             }
             if($user->status==1){
-                if(Hash::check("12345678",$user->password)){
+                if(Hash::check($request->password,$user->password)){
 
                     if(Auth::guard('web')->attempt($credential,$request->remember)){
                         $notification= trans('user_validation.Login Successfully');

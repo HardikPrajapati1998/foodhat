@@ -37,9 +37,9 @@ class RegisterController extends Controller
         // Retrieve the email from the request or set it to null
         $email = $request->input('email', null);
 
-        if($email == null)
-            return view('auth', compact('recaptcha_setting'));
-        else
+        // if($email == null)
+        //     return view('auth', compact('recaptcha_setting'));
+        // else
             return view('register', compact('recaptcha_setting', 'email'));
     }
 
@@ -95,7 +95,7 @@ class RegisterController extends Controller
         $rules = [
             'name'=>'required',
             'email'=>'required|unique:users',
-            // 'mobile'=>'required|min:10|max:10',
+            'mobile'=>'required|min:10|max:10',
             'g-recaptcha-response'=>new Captcha()
         ];
         $customMessages = [
@@ -108,7 +108,7 @@ class RegisterController extends Controller
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
-        $user->password = Hash::make("12345678");
+        $user->password = Hash::make( $request->password);
         $user->mobile = $request->mobile;
         $user->phone = $request->mobile;
         $user->verify_token = null;

@@ -66,16 +66,16 @@
                                         <button data-toggle="modal" data-target="#createNewUser" type="button" class="btn btn-primary w-100"><i class="fa fa-plus" aria-hidden="true"></i>{{__('admin.New')}}</button>
                                     </div>
                                 </div>
-                                
+
                             </div>
-                            
+
                             <div class="card-body">
                                 <h5 style="display: flex; align-items:center; gap:0.5rem;">
-                                    <i class="fa fa-user" aria-hidden="true"></i> 
+                                    <i class="fa fa-user" aria-hidden="true"></i>
                                     Place a new order
                                 <!-- <button id="createNewAddressBtn" class="btn btn-primary btn-sm"><i class="fa fa-plus" aria-hidden="true"></i></button> -->
                                 </h5>
-                                
+
                                 <div class="shopping-card-body">
                                     <table class="table">
                                         <thead>
@@ -114,11 +114,11 @@
 
                                         </tbody>
                                     </table>
-                                    
+
                                     <div>
                                         <p><span>{{__('admin.Subtotal')}}</span> : <span>{{ $currency_icon }}{{ $sub_total }}</span></p>
                                         <p><span>{{__('admin.GST')}}</span> : <span id="report_delivery_fee">{{ $currency_icon }}0.00</span></p>
-                                        
+
                                         <p><span>{{__('admin.Total')}}</span> : <span id="report_total_fee">{{ $currency_icon }}{{ $sub_total -  $coupon_price}}</span></p>
                                     </div>
 
@@ -137,7 +137,7 @@
                                 </div>
                                 <br>
 
-                                
+
                                 <div>
                                     <button id="placeOrderBtn" class="btn btn-success">{{__('admin.Place order')}}</button>
                                     <a href="{{ route('admin.cart-clear') }}" class="btn btn-danger">{{__('admin.Reset')}}</a>
@@ -151,6 +151,11 @@
                                     <input type="hidden" value="0.00" name="coupon_price" id="couon_price">
                                     <input type="hidden" value="0.00" name="delivery_fee" id="order_delivery_fee">
                                     <input type="hidden" value="{{ $sub_total }}" name="total_fee" id="order_total_fee">
+                                </form>
+                                <form action="{{ route('admin.print.order') }}" method="POST" id="print-order-form">
+                                    @csrf
+                                    <input type="hidden" name="order_id" value="{{ 1 }}">
+                                    <button type="submit" class="btn btn-primary">Print Order</button>
                                 </form>
                             </div>
                         </div>
@@ -312,7 +317,7 @@
     (function($) {
         "use strict";
         $(document).ready(function () {
-            
+
             $("#coupon_form").on("submit", function(e){
                     e.preventDefault();
 
@@ -371,7 +376,7 @@
                 });
 
             });
-            
+
                 console.log("pohanch gaya");
                 function updateOrderCount() {
                     var selectedIndex = this.selectedIndex;
@@ -583,7 +588,7 @@
             }else{
                 apply_coupon_price = coupon_price;
             }
-        
+
         let order_total_fee = parseInt(order_delivery_fee) + parseInt(cart_sub_total) - parseInt(coupon_price);
         $("#order_total_fee").val(cart_sub_total);
         $("#coupon_price").val(coupon_price);

@@ -13,12 +13,16 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\OrdersExport;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use App\Services\PrinterService;
 
 class OrderController extends Controller
 {
-    public function __construct()
+    protected $printerService;
+
+    public function __construct(PrinterService $printerService)
     {
         $this->middleware('auth:admin');
+        $this->printerService = $printerService;
     }
 
     public function index(){
@@ -222,6 +226,32 @@ class OrderController extends Controller
 
 }
 
+public function printOrder(Request $request)
+{
+    $order = $this->getOrderDetails($request->order_id);
+
+    try {
+        // Print to kitchen
+        $this->printerService->printToKitchen($order->details);
+
+        // Print to desk
+        $this->printerService->printToDesk($order->summary);
+
+        return response()->json(['message' => 'Order printed successfully']);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Printing failed: ' . $e->getMessage()], 500);
+    }
+}
+
+private function getOrderDetails($orderId)
+{
+    // Implement this method to fetch order details based on the order ID.
+    // This is just a placeholder implementation.
+    return (object) [
+        'details' => 'Order details text for the kitchen printer',
+        'summary' => 'Order summary text for the desk printer'
+    ];
+}
 
 
 }

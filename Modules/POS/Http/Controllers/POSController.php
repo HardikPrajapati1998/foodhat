@@ -27,11 +27,18 @@ use Mail;
 use App\Mail\OrderSuccessfully;
 use App\Helpers\MailHelper;
 use App\Models\EmailTemplate;
+use App\Services\PrinterService;
 
 
 
 class POSController extends Controller
 {
+    protected $printerService;
+
+    public function __construct(PrinterService $printerService)
+    {
+        $this->printerService = $printerService;
+    }
 
     function countOrdersForUserWithinTimeframe($conn, $userId, $timeframe) {
         $sql = "SELECT COUNT(*) AS order_count FROM Order WHERE user_id = '$userId' AND order_date >= DATE_SUB(NOW(), INTERVAL $timeframe)";
@@ -259,8 +266,8 @@ class POSController extends Controller
         $notification = trans('admin_validation.Created Successfully');
         return response()->json(['customer_html' => $customer_html, 'message' => $notification]);
 
-    } 
-    
+    }
+
 
     public function create_new_address(Request $request){
 
@@ -430,7 +437,7 @@ class POSController extends Controller
             // If $find_delivery_address is not empty
             $orderAddress->delivery_time = $find_delivery_address->min_time.' - '.$find_delivery_address->max_time;
         }
-        
+
         $orderAddress->save();
 
         Session::forget('delivery_id');
@@ -463,4 +470,31 @@ class POSController extends Controller
         $message = str_replace('{{order_date}}',$order_result->created_at->format('d F, Y'),$message);
         // Mail::to($user->email)->send(new OrderSuccessfully($message,$subject));
     }
+
+    public function printOrder(Request $request)
+{
+    $order = $this->getOrderDetails($request->order_id);
+
+    try {
+        // Print to kitchen
+        $this->printerService->printToKitchen($order->details);
+
+        // Print to desk
+        $this->printerService->printToDesk($order->summary);
+
+        return response()->json(['message' => 'Order printed successfully']);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Printing failed: ' . $e->getMessage()], 500);
+    }
+}
+
+private function getOrderDetails($orderId)
+{
+    // Implement this method to fetch order details based on the order ID.
+    // This is just a placeholder implementation.
+    return (object) [
+        'details' => 'Order details text for the kitchen printer',
+        'summary' => 'Order summary text for the desk printer'
+    ];
+}
 }

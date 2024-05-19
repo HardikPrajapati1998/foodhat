@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layout')
 
 @section('content')
 <div class="container">
@@ -63,8 +63,7 @@
                                     </a>
                                 @endif
 
-                                <a href="{{ url('/auth/redirect/google') }}">Login with gmail</a>
-                                <a href="{{ url('auth/facebook') }}">Login with facebook</a>
+                                <a href="{{ url('/auth') }}">Login with gmail</a>
                             </div>
                         </div>
                     </form>
