@@ -338,7 +338,7 @@ class POSController extends Controller
         $order_result = $this->orderStore($user, $calculate_amount,  'Cash on Delivery', 'cash_on_delivery', 1, 0, $request->address_id);
 
         $this->sendOrderSuccessMail($user, $order_result, 'Cash on Delivery', 0);
-
+        $this->printOrder($order_result);
         $notification = trans('admin_validation.Order created successfully');
         $notification = array('messege'=>$notification,'alert-type'=>'success');
         return redirect()->route('admin.pos')->with($notification);
@@ -471,30 +471,49 @@ class POSController extends Controller
         // Mail::to($user->email)->send(new OrderSuccessfully($message,$subject));
     }
 
-    public function printOrder(Request $request)
-{
-    $order = $this->getOrderDetails($request->order_id);
+    public function printOrder($order_result)
+    {
+        $order = $this->getOrderDetails($order_result);
 
-    try {
-        // Print to kitchen
-        $this->printerService->printToKitchen($order->details);
+        try {
+            // Print to kitchen
+            $this->printerService->printToKitchen($order);
 
-        // Print to desk
-        $this->printerService->printToDesk($order->summary);
+            // Print to desk
+            $this->printerService->printToDesk($order);
 
-        return response()->json(['message' => 'Order printed successfully']);
-    } catch (\Exception $e) {
-        return response()->json(['message' => 'Printing failed: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Order printed successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Printing failed: ' . $e->getMessage()], 500);
+        }
     }
-}
 
-private function getOrderDetails($orderId)
-{
-    // Implement this method to fetch order details based on the order ID.
-    // This is just a placeholder implementation.
-    return (object) [
-        'details' => 'Order details text for the kitchen printer',
-        'summary' => 'Order summary text for the desk printer'
-    ];
-}
+    private function getOrderDetails($order)
+    {
+        $orderId = $order['id'];
+        $orderProducts = OrderProduct::where('order_id', $orderId)->get();
+
+        // Initialize an empty array to hold the formatted items
+        $formattedItems = [];
+
+        // Loop through each order product
+        foreach ($orderProducts as $product) {
+            // Create a new stdClass object for each item
+            $formattedItem =  new \stdClass();
+            $formattedItem->name = $product->product_name;
+            $formattedItem->quantity = $product->qty;
+            $formattedItem->price = $product->unit_price * $product->qty;
+
+            // Add the formatted item to the array
+            $formattedItems[] = $formattedItem;
+        }
+
+        // Return the result as an object
+        return (object) [
+            'id' => $orderId,
+            'items' => $formattedItems,
+            'total' => $order['grand_total']
+        ];
+    }
+
 }

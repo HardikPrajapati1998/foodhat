@@ -73,6 +73,7 @@
                         <h6>{{__('user.total price')}}</h6>
                         <p>{{__('user.subtotal')}}: <span>{{ $currency_icon }}{{ $sub_total }}</span></p>
                         <p>{{__('user.discount')}} (-): <span>{{ $currency_icon }}{{ $coupon_price }}</span></p>
+                        <p>{{__('user.delivery')}} (+): <span class="delivery_charge">{{ $currency_icon }}0.00</span></p>
                         <p class="total"><span>{{__('user.Total')}}:</span> <span class="grand_total">{{ $currency_icon }}{{ $sub_total - $coupon_price }}</span></p>
                         <input type="hidden" id="grand_total" value="{{ $sub_total - $coupon_price }}">
                         <form action="{{ route('apply-coupon-from-checkout') }}">
@@ -92,12 +93,12 @@
         var map;
 
         function initMap() {
-        console.log("Initializing map...");
-        map = new google.maps.Map(document.getElementById('map'), {
-            center: {lat: -34.397, lng: 150.644}, // Default center
-            zoom: 15 // Default zoom level
-            });
-        }
+    console.log("Initializing map...");
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: -34.397, lng: 150.644}, // Default center
+        zoom: 15 // Default zoom level
+    });
+}
 
 function getLocation() {
     console.log("Getting user location...");
@@ -152,7 +153,7 @@ function showPosition(position) {
             }
         }
     };
-    
+
 }
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC2EqH1cqg0L0yTJ86hiGsr_ZAfEl1khss&callback=initMap"></script>
@@ -162,7 +163,10 @@ function showPosition(position) {
                 $(document).ready(function () {
                     $("input[name='address_id']").on("change", function() {
                         var delivery_id = $("input[name='address_id']:checked").val();
-
+                        $(".delivery_charge").html(`{{ $currency_icon }}${0}`);
+                        let grand_total = $("#grand_total").val();
+                        grand_total = parseInt(grand_total) + parseInt(0);
+                        $(".grand_total").html(`{{ $currency_icon }}${grand_total}`);
                         // Ajax call to update delivery charge
                         $.ajax({
                             type: 'get',

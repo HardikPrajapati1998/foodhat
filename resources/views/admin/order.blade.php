@@ -62,7 +62,7 @@
                                     <th width="10%">{{__('admin.Quantity')}}</th>
                                     <th width="10%">{{__('admin.Amount')}}</th>
                                     <th width="10%">{{__('admin.Order Status')}}</th>
-                                    <th width="10%">{{__('admin.Payment')}}</th>
+                                    <th width="10%">{{__('Order Type')}}</th>
                                     <th width="10%">{{__('admin.Action')}}</th>
                                   </tr>
                             </thead>
@@ -96,10 +96,10 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if($order->payment_status == 1)
-                                            <span class="badge badge-success">{{__('admin.success')}} </span>
+                                            @if($order->order_type == 'Pickup')
+                                            <span class="badge badge-success">{{__( 'Pickup')}} </span>
                                             @else
-                                            <span class="badge badge-danger">{{__('admin.Pending')}}</span>
+                                            <span class="badge badge-success">{{__('Delivery')}}</span>
                                             @endif
                                         </td>
 

@@ -191,7 +191,7 @@
                 var openingTime = new Date();
                 openingTime.setHours(11, 0, 0); // Set opening time to 9:30 AM
                 var closingTime = new Date();
-                closingTime.setHours(23, 30, 0); // Set closing time to 11:00 PM
+                closingTime.setHours(24, 30, 0); // Set closing time to 11:00 PM
 
                 // Check if the current time is within the operating hours
                 if (now < openingTime || now > closingTime) {
@@ -202,7 +202,7 @@
                 }
             });
         });
-        
+
         (function($) {
             "use strict";
             $(document).ready(function () {

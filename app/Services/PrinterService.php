@@ -3,36 +3,64 @@
 namespace App\Services;
 
 use Mike42\Escpos\Printer;
-use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
+use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
+use Mike42\Escpos\PrintConnectors\FilePrintConnector;
 
 class PrinterService
 {
-    protected $kitchenPrinterIP;
-    protected $deskPrinterIP;
+    protected $kitchenPrinter;
+    protected $deskPrinter;
 
     public function __construct()
     {
-        $this->kitchenPrinterIP = env('KITCHEN_PRINTER_IP');
-        $this->deskPrinterIP = env('DESK_PRINTER_IP');
+        $this->kitchenPrinter = env('KITCHEN_PRINTER');
+        $this->deskPrinter = env('DESK_PRINTER');
     }
 
-    public function printToKitchen($data)
+    protected function formatOrderDetails($order)
     {
-        $connector = new NetworkPrintConnector($this->kitchenPrinterIP, 9100);
-        $printer = new Printer($connector);
+        $output = "";
+        $output .= "FoodHat Name\n";
+        $output .= "-------------------------\n";
+        $output .= "Order No: " . $order->id . "\n";
+        $output .= "Date: " . date('Y-m-d H:i:s') . "\n";
+        $output .= "-------------------------\n";
+        foreach ($order->items as $item) {
+            $output .= $item->name . " x " . $item->quantity . " = " . $item->price . "\n";
+        }
+        $output .= "-------------------------\n";
+        $output .= "Total: $" . $order->total . "\n";
+        $output .= "-------------------------\n";
+        $output .= "Thank you!\n";
 
-        $printer->text($data);
-        $printer->cut();
-        $printer->close();
+        return $output;
     }
 
-    public function printToDesk($data)
+    public function printToKitchen($order)
     {
-        $connector = new NetworkPrintConnector($this->deskPrinterIP, 9100);
-        $printer = new Printer($connector);
+        try {
+            $connector = new WindowsPrintConnector($this->kitchenPrinter);
+            $printer = new Printer($connector);
 
-        $printer->text($data);
-        $printer->cut();
-        $printer->close();
+            $printer->text($this->formatOrderDetails($order));
+            $printer->cut();
+            $printer->close();
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to print to kitchen printer: ' . $e->getMessage());
+        }
+    }
+
+    public function printToDesk($order)
+    {
+        try {
+            $connector = new WindowsPrintConnector($this->deskPrinter);
+            $printer = new Printer($connector);
+
+            $printer->text($this->formatOrderDetails($order));
+            $printer->cut();
+            $printer->close();
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to print to desk printer: ' . $e->getMessage());
+        }
     }
 }

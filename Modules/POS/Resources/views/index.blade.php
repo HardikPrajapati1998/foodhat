@@ -152,11 +152,6 @@
                                     <input type="hidden" value="0.00" name="delivery_fee" id="order_delivery_fee">
                                     <input type="hidden" value="{{ $sub_total }}" name="total_fee" id="order_total_fee">
                                 </form>
-                                <form action="{{ route('admin.print.order') }}" method="POST" id="print-order-form">
-                                    @csrf
-                                    <input type="hidden" name="order_id" value="{{ 1 }}">
-                                    <button type="submit" class="btn btn-primary">Print Order</button>
-                                </form>
                             </div>
                         </div>
                     </div>

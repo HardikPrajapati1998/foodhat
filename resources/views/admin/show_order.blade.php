@@ -84,6 +84,7 @@
                       <div class="invoice-number">Order #{{ $order->order_id }}</div>
                     </div>
                     <hr>
+                    @if ($order->orderAddress)
                     @php
                         $orderAddress = $order->orderAddress;
                     @endphp
@@ -102,6 +103,14 @@
                             <br>
                         </address>
                       </div>
+                      @else
+                      <div class="row">
+                        <div class="col-md-6" style="display: block !important">
+                          <address>
+                            {{ $order->order_type }}
+                          </address>
+                        </div>
+                      @endif
                       <div class="col-md-6 text-md-right">
                         <address>
                             <strong>{{__('admin.Payment Information')}}:</strong><br>

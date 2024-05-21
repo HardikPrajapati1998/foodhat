@@ -61,9 +61,63 @@ class PaymentController extends Controller
         $user = Auth::guard('web')->user();
         $addresses = Address::with('deliveryArea')->where(['user_id' => $user->id])->get();
         $cart_contents = Cart::content();
+        Session::put('order_type' , 2);
         $delivery_areas = DeliveryArea::where('status', 1)->get();
 
         return view('checkout')->with(['addresses' => $addresses, 'cart_contents' => $cart_contents, 'delivery_areas' => $delivery_areas]);
+    }
+
+    public function pickup(){
+        if(Cart::count() == 0){
+            $notification = trans('user_validation.Your cart is empty!');
+            $notification = array('messege'=>$notification,'alert-type'=>'error');
+            return redirect()->route('products')->with($notification);
+        }
+
+        $user = Auth::guard('web')->user();
+        $addresses = Address::with('deliveryArea')->where(['user_id' => $user->id])->get();
+        $cart_contents = Cart::content();
+        Session::put('order_type' , 1);
+        $delivery_areas = DeliveryArea::where('status', 1)->get();
+
+        return view('pickup')->with(['addresses' => $addresses, 'cart_contents' => $cart_contents, 'delivery_areas' => $delivery_areas]);
+    }
+
+    public function loc(Request $request)
+    {
+        // Assuming you have logic here to get user's location, you can use $request->input('lat') and $request->input('lng')
+
+        // For demo purposes, let's assume you have the user's latitude and longitude
+        $lat = $request->input('lat', 0); // Default to 0 if lat parameter is not provided
+        $lng = $request->input('lng', 0); // Default to 0 if lng parameter is not provided
+        $restaurants = [
+            ["name" => "Restaurant 1", "latitude" => 40.7128, "longitude" => -74.0060],
+            ["name" => "Restaurant 2", "latitude" => 40.7211, "longitude" => -74.0042],
+            ["name" => "Restaurant 3", "latitude" => 40.7306, "longitude" => -74.0027],
+            // Add more restaurants as needed
+        ];
+
+        // Function to calculate distance between two points (latitude and longitude)
+        function distance($lat1, $lon1, $lat2, $lon2) {
+            $theta = $lon1 - $lon2;
+            $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+            $dist = acos($dist);
+            $dist = rad2deg($dist);
+            $miles = $dist * 60 * 1.1515;
+            return $miles;
+        }
+
+        // Get latitude and longitude parameters from the request
+        $lat = isset($_GET['lat']) ? floatval($_GET['lat']) : 0;
+        $lng = isset($_GET['lng']) ? floatval($_GET['lng']) : 0;
+
+        // Filter nearby restaurants based on a certain radius (for demo purposes, let's say 10 miles)
+
+        $nearby_restaurants = array_filter($restaurants, function($restaurant) use ($lat, $lng) {
+            return  distance($lat, $lng, $restaurant['latitude'], $restaurant['longitude']) <= 10;
+        });
+        // Return the response
+        return view('loc')->with(['responseText' => $nearby_restaurants]);
     }
 
 
@@ -180,7 +234,7 @@ class PaymentController extends Controller
 
         // Create eWay client
         $client = \Eway\Rapid::createClient($apiKey, $apiPass, $endPoint);
-            
+
         $transaction = [
             'Customer' => [
                 'FirstName' => $user->name,
@@ -253,7 +307,6 @@ class PaymentController extends Controller
             try {
                 $response = $api->payment->fetch($input['razorpay_payment_id'])->capture(array('amount'=>$payment['amount']));
                 $payId = $response->id;
-
                 $user = Auth::guard('web')->user();
                 $calculate_amount = $this->calculate_amount(7);
 
@@ -693,11 +746,13 @@ class PaymentController extends Controller
 
     public function orderStore($user, $calculate_amount, $payment_method, $transaction_id, $payment_status, $cash_on_delivery, $address_id){
 
+        $orderType = Session::get('order_type');
+
         $order = new Order();
         $order->order_id = substr(rand(0,time()),0,10);
         $order->user_id = $user->id;
         $order->grand_total = $calculate_amount['grand_total'];
-        $order->delivery_charge = $calculate_amount['delivery_charge'];
+        $order->delivery_charge = ( $orderType == 1 )? 0 : $calculate_amount['delivery_charge'];
         $order->coupon_price = $calculate_amount['coupon_price'];
         $order->sub_total = $calculate_amount['sub_total'];
         $order->product_qty = Cart::count();
@@ -705,6 +760,7 @@ class PaymentController extends Controller
         $order->transection_id = $transaction_id;
         $order->payment_status = $payment_status;
         $order->order_status = 0;
+        $order->order_type = ($orderType == 1) ? 'Pickup' : 'Delivery';
         $order->cash_on_delivery = $cash_on_delivery;
         $order->save();
 
@@ -732,6 +788,7 @@ class PaymentController extends Controller
         }
 
         // store address
+        if($orderType != 1){
         $address_id = Session::get('delivery_id');
         $find_address = Address::find($address_id);
         $find_delivery_address = DeliveryArea::find($find_address->delivery_area_id);
@@ -745,7 +802,8 @@ class PaymentController extends Controller
         $orderAddress->latitude = $find_address->latitude;
         $orderAddress->delivery_time = $find_delivery_address->min_time.' - '. $find_delivery_address->max_time;
         $orderAddress->save();
-
+        }
+        Session::forget('order_type');
         Session::forget('delivery_id');
         Session::forget('delivery_charge');
         Session::forget('coupon_price');
