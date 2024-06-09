@@ -89,13 +89,15 @@ class POSController extends Controller
             $customer->orderCount = $orderCount;
         }
 
-
+        $orders = Order::with('user')->orderBy('id', 'desc')->where('order_status', 0)->get();
+        $pendingOrderCount = $orders->count();
         return view('pos::index')->with([
             'products' => $products,
             'categories' => $categories,
             'customers' => $customers,
             'cart_contents' => $cart_contents,
             'delivery_areas' => $delivery_areas,
+            'pendingOrderCount' => $pendingOrderCount
         ]);
     }
 
@@ -338,7 +340,8 @@ class POSController extends Controller
         $order_result = $this->orderStore($user, $calculate_amount,  'Cash on Delivery', 'cash_on_delivery', 1, 0, $request->address_id);
 
         $this->sendOrderSuccessMail($user, $order_result, 'Cash on Delivery', 0);
-        $this->printOrder($order_result);
+        $customerDetails = $request->customerDetails ?? "walking";
+        $this->printOrder($order_result,$customerDetails);
         $notification = trans('admin_validation.Order created successfully');
         $notification = array('messege'=>$notification,'alert-type'=>'success');
         return redirect()->route('admin.pos')->with($notification);
@@ -471,9 +474,9 @@ class POSController extends Controller
         // Mail::to($user->email)->send(new OrderSuccessfully($message,$subject));
     }
 
-    public function printOrder($order_result)
+    public function printOrder($order_result,$customerDetails)
     {
-        $order = $this->getOrderDetails($order_result);
+        $order = $this->getOrderDetails($order_result,$customerDetails);
 
         try {
             // Print to kitchen
@@ -488,7 +491,7 @@ class POSController extends Controller
         }
     }
 
-    private function getOrderDetails($order)
+    private function getOrderDetails($order,$customerDetails)
     {
         $orderId = $order['id'];
         $orderProducts = OrderProduct::where('order_id', $orderId)->get();
@@ -512,8 +515,16 @@ class POSController extends Controller
         return (object) [
             'id' => $orderId,
             'items' => $formattedItems,
-            'total' => $order['grand_total']
+            'discount' => $order['coupon_price'],
+            'delivery' => $order['delivery_charge'],
+            'total' => $order['grand_total'],
+            'customerDetails' => $customerDetails
         ];
+    }
+
+    public function getPendingOrderCount() {
+        $pendingOrderCount = Order::where('order_status', 0)->count();
+        return response()->json(['count' => $pendingOrderCount]);
     }
 
 }

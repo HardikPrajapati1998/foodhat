@@ -38,6 +38,7 @@
 
 <div>
     <p><span>{{__('admin.Subtotal')}}</span> : <span>{{ $currency_icon }}{{ $sub_total }}</span></p>
+    <p><span>{{__('Discount (-)')}}</span> : <span id="report_coupon_price">{{ $currency_icon }}0.00</span></p>
     <p><span>{{__('admin.Delivery')}}</span> : <span id="report_delivery_fee">{{ $currency_icon }}0.00</span></p>
     <p><span>{{__('admin.Total')}}</span> : <span id="report_total_fee">{{ $currency_icon }}{{ $sub_total }}</span></p>
 </div>

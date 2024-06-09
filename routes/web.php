@@ -354,6 +354,7 @@ Route::group(['as'=> 'admin.', 'prefix' => 'admin'],function (){
 
     Route::get('all-order', [OrderController::class, 'index'])->name('all-order');
     Route::get('pending-order', [OrderController::class, 'pendingOrder'])->name('pending-order');
+    Route::get('pending-order-count', [OrderController::class, 'getPendingOrderCount'])->name('admin.pendingOrderCount');
     Route::get('pregress-order', [OrderController::class, 'pregressOrder'])->name('pregress-order');
     Route::get('delivered-order', [OrderController::class, 'deliveredOrder'])->name('delivered-order');
     Route::get('completed-order', [OrderController::class, 'completedOrder'])->name('completed-order');

@@ -21,7 +21,7 @@
                                             <input type="text" class="form-control" name="name" placeholder="{{__('admin.Search here..')}}" autocomplete="off" value="{{ request()->get('name') }}">
                                         </div>
                                         <div class="col-md-4">
-                                            <select name="category_id" id="category_id" class="form-control">
+                                            <select name="category_id" id="category_id" class="form-control" onchange="submitForm()">
                                                 <option value="">{{__('admin.Select Category')}}</option>
                                                 @if (request()->has('category_id'))
                                                     @foreach ($categories as $category)
@@ -73,9 +73,24 @@
                                 <h5 style="display: flex; align-items:center; gap:0.5rem;">
                                     <i class="fa fa-user" aria-hidden="true"></i>
                                     Place a new order
+                                    <a href="{{ route('admin.pendingorder') }}" class="btn btn-danger" style="margin-left: auto;" id="pendingOrderLink">
+                                        Pending Orders: <span id="pendingOrderCount">{{ $pendingOrderCount }}</span>
+                                    </a>
+
                                 <!-- <button id="createNewAddressBtn" class="btn btn-primary btn-sm"><i class="fa fa-plus" aria-hidden="true"></i></button> -->
                                 </h5>
-
+                                <div class="form-group">
+                                    <label for="customer-input">{{__('customer details')}}:</label>
+                                    <textarea id="customer-input" class="form-control" value="walking" oninput="updateTotal()" rows="4"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="discount">{{__('admin.Discount')}}:</label>
+                                    <input type="number" id="discount" class="form-control" value="0" oninput="updateTotal()">
+                                </div>
+                                <div class="form-group">
+                                    <label for="delivery">{{__('admin.Delivery')}}:</label>
+                                    <input type="number" id="delivery" class="form-control" value="0" oninput="updateTotal()">
+                                </div>
                                 <div class="shopping-card-body">
                                     <table class="table">
                                         <thead>
@@ -116,8 +131,11 @@
                                     </table>
 
                                     <div>
+
                                         <p><span>{{__('admin.Subtotal')}}</span> : <span>{{ $currency_icon }}{{ $sub_total }}</span></p>
-                                        <p><span>{{__('admin.GST')}}</span> : <span id="report_delivery_fee">{{ $currency_icon }}0.00</span></p>
+                                        <p><span>{{__('Discount (-)')}}</span> : <span id="report_coupon_price">{{ $currency_icon }}0.00</span></p>
+
+                                        <p><span>{{__('admin.Delivery')}}</span> : <span id="report_delivery_fee">{{ $currency_icon }}0.00</span></p>
 
                                         <p><span>{{__('admin.Total')}}</span> : <span id="report_total_fee">{{ $currency_icon }}{{ $sub_total -  $coupon_price}}</span></p>
                                     </div>
@@ -125,7 +143,6 @@
                                     <input type="hidden" id="cart_sub_total" value="{{ $sub_total }}">
 
                                 </div>
-                                <p> Discount (-): <span id="report_couon_price">{{ $currency_icon }}0.00</span></p>
                                 <br>
                                 <div id="order_count_display" style="display:none;">
                                     <form id="coupon_form">
@@ -146,9 +163,10 @@
                                 <form id="placeOrderForm" action="{{ route('admin.place-order') }}" method="POST">
                                     @csrf
                                     <input type="hidden" value="{{ $sub_total }}" name="sub_total" id="order_sub_total">
+                                    <input type="hidden" value="walking" name="customerDetails" id="customerInput">
                                     <input type="hidden" value="5" name="customer_id" id="order_customer_id">
                                     <input type="hidden" value="3" name="address_id" id="order_address_id">
-                                    <input type="hidden" value="0.00" name="coupon_price" id="couon_price">
+                                    <input type="hidden" value="0.00" name="coupon_price" id="coupon_price">
                                     <input type="hidden" value="0.00" name="delivery_fee" id="order_delivery_fee">
                                     <input type="hidden" value="{{ $sub_total }}" name="total_fee" id="order_total_fee">
                                 </form>
@@ -312,7 +330,6 @@
     (function($) {
         "use strict";
         $(document).ready(function () {
-
             $("#coupon_form").on("submit", function(e){
                     e.preventDefault();
 
@@ -532,7 +549,24 @@
                 });
             })
 
+            function fetchPendingOrderCount() {
+                $.ajax({
+                    url: '{{ route('admin.pendingOrderCount') }}',
+                    type: 'GET',
+                    success: function(response) {
+                        $('#pendingOrderCount').text(response.count);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error fetching pending order count:', error);
+                    }
+                });
+            }
 
+            // Fetch pending order count every 5 seconds
+            setInterval(fetchPendingOrderCount, 5000);
+
+            // Initial fetch on page load
+            fetchPendingOrderCount();
 
         });
     })(jQuery);
@@ -569,31 +603,31 @@
         });
     }
 
-    function calculateTotalFee(){
+     function calculateTotalFee(){
 
-        let order_delivery_fee = $("#order_delivery_fee").val();
-        let cart_sub_total = $("#cart_sub_total").val();
-        let coupon_price = $("#couon_price").val();
-        let couon_offer_type = $("#couon_offer_type").val();
+         let order_delivery_fee = $("#order_delivery_fee").val();
+         let cart_sub_total = $("#cart_sub_total").val();
+         let coupon_price = $("#couon_price").val();
+         let couon_offer_type = $("#couon_offer_type").val();
 
-        let apply_coupon_price = 0.00;
-            if(couon_offer_type == 1) {
-                let percentage = parseInt(coupon_price) / parseInt(100)
-                apply_coupon_price = (parseFloat(percentage) * parseFloat(sub_total));
-            }else{
-                apply_coupon_price = coupon_price;
-            }
+         let apply_coupon_price = 0.00;
+             if(couon_offer_type == 1) {
+                 let percentage = parseInt(coupon_price) / parseInt(100)
+                 apply_coupon_price = (parseFloat(percentage) * parseFloat(sub_total));
+             }else{
+                 apply_coupon_price = coupon_price;
+             }
 
-        let order_total_fee = parseInt(order_delivery_fee) + parseInt(cart_sub_total) - parseInt(coupon_price);
-        $("#order_total_fee").val(cart_sub_total);
-        $("#coupon_price").val(coupon_price);
-        let order_sub_total = $("#order_sub_total").val();
+         let order_total_fee = parseInt(order_delivery_fee) + parseInt(cart_sub_total) - parseInt(coupon_price);
+         $("#order_total_fee").val(cart_sub_total);
+         $("#coupon_price").val(coupon_price);
+         let order_sub_total = $("#order_sub_total").val();
 
-        $("#report_delivery_fee").html(`{{ $currency_icon }}${order_delivery_fee}`);
-        $("#report_couon_price").html(`{{ $currency_icon }}${coupon_price}`);
-        $("#report_total_fee").html(`{{ $currency_icon }}${order_total_fee}`);
-
-    }
+         $("#report_delivery_fee").html(`{{ $currency_icon }}${order_delivery_fee}`);
+         $("#report_couon_price").html(`{{ $currency_icon }}${coupon_price}`);
+         $("#report_total_fee").html(`{{ $currency_icon }}${order_total_fee}`);
+            this.updateTotal();
+     }
 
     function loadProudcts(){
         $.ajax({
@@ -620,5 +654,57 @@
             }
         });
     }
+
+    function submitForm() {
+    $("#product_search_form").on("submit", function(e){
+        e.preventDefault();
+
+        $("#search_btn_text").html(`{{__('admin.Searching...')}}`);
+
+        $.ajax({
+            type: 'get',
+            data: $('#product_search_form').serialize(),
+            url: "{{ route('admin.load-products') }}",
+            success: function (response) {
+                $("#search_btn_text").html(`{{__('admin.Search')}}`);
+                $(".product_body").html(response);
+            },
+            error: function(response) {
+                $("#search_btn_text").html(`{{__('admin.Search')}}`);
+
+                if(response.status == 500){
+                    toastr.error("{{__('admin.Server error occured')}}");
+                }
+
+                if(response.status == 403){
+                    toastr.error(response.responseJSON.message);
+                }
+            }
+        });
+    });
+
+
+    $("#product_search_form").submit();
+}
+
+function updateTotal() {
+    let customerInput = $('#customer-input').val();
+    let subTotal = parseFloat($('#cart_sub_total').val());
+    let discount = parseFloat($('#discount').val());
+    let deliveryFee = parseFloat($('#delivery').val());
+    let total = subTotal - discount + deliveryFee;
+
+    $('#report_sub_total').text("{{ $currency_icon }}" + subTotal.toFixed(2));
+    $('#report_coupon_price').text("{{ $currency_icon }}" + discount.toFixed(2));
+    $('#report_delivery_fee').text("{{ $currency_icon }}" + deliveryFee.toFixed(2));
+    $('#report_total_fee').text("{{ $currency_icon }}" + total.toFixed(2));
+
+    $('#order_sub_total').val(subTotal.toFixed(2));
+    $('#coupon_price').val(discount.toFixed(2));
+    $('#order_delivery_fee').val(deliveryFee.toFixed(2));
+    $('#order_total_fee').val(total.toFixed(2));
+    $('#customerInput').val(customerInput);
+}
+
 </script>
 @endsection
