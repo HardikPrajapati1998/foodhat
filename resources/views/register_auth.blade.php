@@ -39,44 +39,25 @@
                     <div class="tf__login_area">
                         <h2>{{__('user.Registration')}}</h2>
                         <p>{{__('user.For new user you have to register here')}}</p>
-                        <form action="{{ route('store-register') }}" method="POST">
+                        <form id="registerForm" action="{{ route('store-register') }}" method="POST">
                             @csrf
                             <div class="row">
                                 <div class="col-xl-12">
                                     <div class="tf__login_imput">
-                                        <input type="text" name="name" placeholder="{{__('user.Name')}}">
+                                        <input type="text" name="name" placeholder="UserName">
                                     </div>
                                 </div>
                                 <div class="col-xl-12">
                                     <div class="tf__login_imput">
-                                        <input type="email" name="email" placeholder="{{__('user.Email')}}" value="{{$email}}">
-                                    </div>
-                                </div>
-
-                                <div class="col-xl-12">
-                                    <div class="tf__login_imput">
-                                        <input type="number" name="mobile" placeholder="{{__('user.Mobile')}}">
+                                    <input type="hidden" name="email" value="{{ $email }}" >
                                     </div>
                                 </div>
 
                                 <div class="col-xl-12">
                                     <div class="tf__login_imput">
-                                        <input type="password" name="password" placeholder="{{__('user.Password')}}">
+                                        <input type="Number" name="mobile" placeholder="Phone Number">
                                     </div>
                                 </div>
-
-                                <div class="col-xl-12">
-                                    <div class="tf__login_imput">
-                                        <input type="password" name="password_confirmation" placeholder="{{__('user.Confirm Password')}}">
-                                    </div>
-                                </div>
-
-
-                                @if($recaptcha_setting->status==1)
-                                    <div class="col-xl-12 mb-3">
-                                        <div class="g-recaptcha" data-sitekey="{{ $recaptcha_setting->site_key }}"></div>
-                                    </div>
-                                @endif
 
                                 <div class="col-xl-12">
                                     <div class="tf__login_imput">
@@ -85,8 +66,6 @@
                                 </div>
                             </div>
                         </form>
-
-                        <p class="create_account">{{__('user.Already have an account ?')}} <a href="{{ route('login') }}">{{__('user.Login here')}}</a>
                     </div>
                 </div>
             </div>
@@ -100,35 +79,35 @@
 
     <script>
 
-        // function isValidEmail(email) {
-        //     // Regular expression for validating an email address
-        //     var emailRegex = /\S+@\S+\.\S+/;
-        //     return emailRegex.test(email);
-        // }
+        function isValidEmail(email) {
+            // Regular expression for validating an email address
+            var emailRegex = /\S+@\S+\.\S+/;
+            return emailRegex.test(email);
+        }
 
-        // // Function to get email address from the URL
-        // function getEmailFromURL() {
-        //     var urlParams = new URLSearchParams(window.location.search);
-        //     return urlParams.get('email');
-        // }
+        // Function to get email address from the URL
+        function getEmailFromURL() {
+            var urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('email');
+        }
 
-        // // Function to handle form submission
-        // function submitForm() {
-        //     var email = {!! json_encode($email) !!}; // Retrieve email from PHP variable
-        //     console.log(email);
-        //     var appUrl = "{{ env('APP_URL') }}";
-        //     if (!email) {
-        //         // Redirect to the authentication page
-        //         window.location.href = appUrl + '/auth';
-        //     }else{
-        //         document.getElementById('emailInput').value = email;
-        //     }
-        // }
+        // Function to handle form submission
+        function submitForm() {
+            var email = {!! json_encode($email) !!}; // Retrieve email from PHP variable
+            console.log(email);
+            var appUrl = "{{ env('APP_URL') }}";
+            if (!email) {
+                // Redirect to the authentication page
+                window.location.href = appUrl + '/auth';
+            }else{
+                document.getElementById('emailInput').value = email;
+            }
+        }
 
-        // // Call the submitForm function when the page loads
-        // window.onload = function() {
-        //     submitForm();
-        // };
+        // Call the submitForm function when the page loads
+        window.onload = function() {
+            submitForm();
+        };
     </script>
 
 @endsection

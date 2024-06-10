@@ -41,7 +41,17 @@ class LoginController extends Controller
         return view('login', compact('recaptcha_setting','social_login'));
     }
 
+    public function login_auth_page(){
+        $recaptcha_setting = GoogleRecaptcha::first();
+        $social_login = SocialLoginInformation::first();
+
+        return view('login_auth', compact('recaptcha_setting','social_login'));
+    }
+
     public function store_page(Request $request){
+        $request->merge([
+            'password' => $request->password ?? "12345678",
+        ]);
         $recaptcha_setting = GoogleRecaptcha::first();
         $rules = [
             'email'=>'required',
@@ -65,7 +75,6 @@ class LoginController extends Controller
             }
             if($user->status==1){
                 if(Hash::check($request->password,$user->password)){
-
                     if(Auth::guard('web')->attempt($credential,$request->remember)){
                         $notification= trans('user_validation.Login Successfully');
                         $notification=array('messege'=>$notification,'alert-type'=>'success');
@@ -90,7 +99,7 @@ class LoginController extends Controller
         }else{
             $notification = trans('user_validation.Email does not exist');
             $notification = array('messege'=>$notification,'alert-type'=>'error');
-            return view('register',compact('recaptcha_setting'))->with(['email' => $request->email]);;
+            return view('register_auth',compact('recaptcha_setting'))->with(['email' => $request->email]);;
         }
     }
 

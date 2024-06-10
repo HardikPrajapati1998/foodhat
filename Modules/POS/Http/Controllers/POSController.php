@@ -383,9 +383,10 @@ class POSController extends Controller
         $order->payment_method = $payment_method;
         $order->transection_id = $transaction_id;
         $order->payment_status = $payment_status;
-        $order->order_status = 1;
+        $order->order_status = 3;
         $order->order_approval_date = date('Y-m-d');
         $order->cash_on_delivery = $cash_on_delivery;
+        $order->order_type = 'Dine-in';
         $order->save();
 
         $cart_contents = Cart::instance('POSCART')->content();

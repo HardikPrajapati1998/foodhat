@@ -104,11 +104,10 @@ class RegisterController extends Controller
             'email.unique' => trans('user_validation.Email already exist'),
         ];
         $this->validate($request, $rules,$customMessages);
-
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
-        $user->password = Hash::make( $request->password);
+        $user->password = Hash::make($request->password ?? "12345678");
         $user->mobile = $request->mobile;
         $user->phone = $request->mobile;
         $user->verify_token = null;
@@ -127,7 +126,15 @@ class RegisterController extends Controller
         // $url = url('/');
         // $message = str_replace('{{app_url}}',$url,$message);
         // Mail::to($user->email)->send(new UserRegistration($message,$subject,$user));
-
+        $credential=[
+            'email'=> $request->email,
+            'password'=> $request->password ?? "12345678"
+        ];
+        if(Auth::guard('web')->attempt($credential,true)){
+            $notification= trans('user_validation.Login Successfully');
+            $notification=array('messege'=>$notification,'alert-type'=>'success');
+            return redirect()->route('dashboard')->with($notification);
+        }
         $notification = trans('user_validation.Register Successfully.');
         $notification = array('messege'=>$notification,'alert-type'=>'success');
         return redirect()->route('dashboard')->with($notification);

@@ -81,10 +81,10 @@
         // Initialize Google Sign-In
         function googleSignIn() {
             // Replace YOUR_CLIENT_ID with your actual Google client ID
-            var CLIENT_ID = '771542863570-sa14n0uagm4vn8tvavk2rjptd4euoag9.apps.googleusercontent.com';
+            var CLIENT_ID = '456750131432-eljd7rh95vadjq5dp7b0omk3kqb0etn7.apps.googleusercontent.com';
             var appUrl = "{{ env('APP_URL') }}";
             // Redirect URI where Google will redirect after authentication
-            var REDIRECT_URI = 'http://localhost/foodhat/main_files/login/';
+            var REDIRECT_URI = appUrl + '/login-auth/';
 
             // Scope for accessing user's email address
             var SCOPE = 'https://www.googleapis.com/auth/userinfo.email';

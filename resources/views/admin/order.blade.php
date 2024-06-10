@@ -98,7 +98,11 @@
                                         <td>
                                             @if($order->order_type == 'Pickup')
                                             <span class="badge badge-success">{{__( 'Pickup')}} </span>
-                                            @else
+                                            @endif
+                                            @if($order->order_type == 'Dine-in')
+                                            <span class="badge badge-success">{{__( 'Dine-in')}} </span>
+                                            @endif
+                                            @if($order->order_type == 'Delivery')
                                             <span class="badge badge-success">{{__('Delivery')}}</span>
                                             @endif
                                         </td>

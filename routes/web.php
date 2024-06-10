@@ -84,6 +84,7 @@ Route::group(['middleware' => ['maintainance','HtmlSpecialchars']], function () 
     Route::get('/subscriber-verification/{token}', [HomeController::class, 'subscriberVerifcation'])->name('subscriber-verification');
 
 
+    Route::get('/login-auth', [LoginController::class, 'login_auth_page'])->name('login-auth');
     Route::get('/login', [LoginController::class, 'login_page'])->name('login');
     Route::post('/store-login', [LoginController::class, 'store_page'])->name('store-login');
     Route::get('/user-logout', [LoginController::class, 'user_logout'])->name('user-logout');

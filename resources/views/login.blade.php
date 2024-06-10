@@ -119,7 +119,7 @@
                             <div class="loader"></div>
                         </div> --}}
 
-                        {{-- <form id = "loginForm" action="{{ route('store-login') }}" method="POST">
+                        <form id = "loginForm" action="{{ route('store-login') }}" method="POST">
                             @csrf
                             <div class="row">
                                 <div class="col-xl-12">
@@ -130,80 +130,16 @@
 
 
                             </div>
-                        </form> --}}
-    <!--=========================
-        SIGNIN END
-    ==========================-->
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+                        </form>
 
-    {{-- <script>
-        function isValidEmail(email) {
-            // Regular expression for validating an email address
-            var emailRegex = /\S+@\S+\.\S+/;
-            return emailRegex.test(email);
-        }
-
-        // Function to get email address from the URL
-        function getEmailFromURL() {
-            var urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('email');
-        }
-
-        function parseAccessToken() {
-            var hash = window.location.hash.substring(1);
-            var params = new URLSearchParams(hash);
-            return params.get('access_token');
-        }
-
-            // Make an API request to retrieve the user's email
-        function getUserEmail(accessToken) {
-            return fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
-                    headers: {
-                    'Authorization': 'Bearer ' + accessToken
-                    }
-                })
-                .then(response => response.json())
-                .then(data => data.email)
-                .catch(error => {
-                console.error('Error retrieving user email:', error);
-                return null;
-                });
-        }
-
-            // Check if the URL contains the access token
-
-
-        Function to handle form submission
-        function submitForm() {
-            var accessToken = parseAccessToken();
-            var appUrl = "{{ env('APP_URL') }}";
-            if (accessToken) {
-                getUserEmail(accessToken)
-                    .then(email => {
-                        console.log(email);
-                        document.getElementById('email').value = email;
-                        // Submit the form
-                        document.getElementById('loginForm').submit();
-                    });
-            } else {
-                // Redirect to the authentication page
-                window.location.href = appUrl + '/login';
-            }
-        }
-
-        Call the submitForm function when the page loads
-        window.onload = function() {
-            submitForm();
-        };
-     </script> --}}
 
      <script>
          function googleSignIn() {
             // Replace YOUR_CLIENT_ID with your actual Google client ID
-            var CLIENT_ID = '771542863570-sa14n0uagm4vn8tvavk2rjptd4euoag9.apps.googleusercontent.com';
+            var CLIENT_ID = '456750131432-eljd7rh95vadjq5dp7b0omk3kqb0etn7.apps.googleusercontent.com';
             var appUrl = "{{ env('APP_URL') }}";
             // Redirect URI where Google will redirect after authentication
-            var REDIRECT_URI = 'http://localhost/foodhat/main_files/login/';
+            var REDIRECT_URI = appUrl + '/login-auth/';
 
             // Scope for accessing user's email address
             var SCOPE = 'https://www.googleapis.com/auth/userinfo.email';
