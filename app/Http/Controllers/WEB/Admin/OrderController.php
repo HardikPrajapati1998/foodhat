@@ -226,30 +226,54 @@ class OrderController extends Controller
 
 }
 
-public function printOrder(Request $request)
+public function printOrder($id)
 {
-    $order = $this->getOrderDetails($request->order_id);
 
+    $order = $this->getOrderDetails($id);
     try {
         // Print to kitchen
-        $this->printerService->printToKitchen($order->details);
+        // $this->printerService->printToKitchen($order);
 
         // Print to desk
-        $this->printerService->printToDesk($order->summary);
+        $this->printerService->printToDesk($order);
 
-        return response()->json(['message' => 'Order printed successfully']);
+        $notification = trans('Print successfully');
+        $notification = array('messege'=>$notification . $id,'alert-type'=>'success');
+        return redirect()->route('admin.all-order')->with($notification);
     } catch (\Exception $e) {
         return response()->json(['message' => 'Printing failed: ' . $e->getMessage()], 500);
     }
 }
 
-private function getOrderDetails($orderId)
+private function getOrderDetails($id)
 {
-    // Implement this method to fetch order details based on the order ID.
-    // This is just a placeholder implementation.
+    $order = Order::with('orderProducts','orderAddress')->find($id);
+    $orderProducts = $order->orderProducts;
+    $orderAddress = $order->orderAddress->address;
+    $customerDetails = $order->orderAddress->name . ", \n" . $order->orderAddress->phone . ", \n" . $orderAddress;
+    // Initialize an empty array to hold the formatted items
+    $formattedItems = [];
+
+    // Loop through each order product
+    foreach ($orderProducts as $product) {
+        // Create a new stdClass object for each item
+        $formattedItem =  new \stdClass();
+        $formattedItem->name = $product->product_name;
+        $formattedItem->quantity = $product->qty;
+        $formattedItem->price = $product->unit_price * $product->qty;
+
+        // Add the formatted item to the array
+        $formattedItems[] = $formattedItem;
+    }
+
+    // Return the result as an object
     return (object) [
-        'details' => 'Order details text for the kitchen printer',
-        'summary' => 'Order summary text for the desk printer'
+        'id' => $id,
+        'items' => $formattedItems,
+        'discount' => $order['coupon_price'],
+        'delivery' => $order['delivery_charge'],
+        'total' => $order['grand_total'],
+        'customerDetails' => $customerDetails
     ];
 }
 

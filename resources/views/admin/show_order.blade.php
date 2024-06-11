@@ -249,7 +249,7 @@
 
               <div class="text-md-right print-area">
                 <hr>
-                <button class="btn btn-success btn-icon icon-left print_btn"><i class="fas fa-print"></i> {{__('admin.Print')}}</button>
+                <button class="btn btn-success btn-icon icon-left print_btn" data-toggle="modal" data-target="#printModal" onclick="printData({{ $order->id }})"><i class="fas fa-print" ></i> {{__('admin.Print')}}</button>
                 <button class="btn btn-danger btn-icon icon-left" data-toggle="modal" data-target="#deleteModal" onclick="deleteData({{ $order->id }})"><i class="fas fa-times"></i> {{__('admin.Delete')}}</button>
               </div>
             </div>
@@ -279,17 +279,22 @@
             $("#deleteForm").attr("action",'{{ url("admin/delete-order/") }}'+"/"+id)
         }
 
-        (function($) {
-            "use strict";
-            $(document).ready(function() {
+        function printData(id){
+            console.log(id)
+            $("#printForm").attr("action",'{{ url("admin/order-print/") }}'+"/"+id)
+        }
 
-                $(".print_btn").on("click", function(){
-                    $(".custom_click").click();
-                    window.print()
-                })
+        // (function($) {
+        //     "use strict";
+        //     $(document).ready(function() {
 
-            });
-        })(jQuery);
+        //         $(".print_btn").on("click", function(){
+        //             $(".custom_click").click();
+        //             window.print()
+        //         })
+
+        //     });
+        // })(jQuery);
 
     </script>
 

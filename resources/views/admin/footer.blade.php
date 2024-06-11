@@ -26,6 +26,30 @@
     </div>
   </div>
 
+  <div class="modal fade" tabindex="-1" role="dialog" id="printModal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{__('admin.Item Delete Confirmation')}}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>{{__('admin.Are You sure print this item ?')}}</p>
+        </div>
+        <div class="modal-footer bg-whitesmoke br">
+            <form id="printForm" action="" method="POST">
+                @csrf
+                @method("POST")
+                <button type="button" class="btn btn-danger" data-dismiss="modal">{{__('admin.Close')}}</button>
+                <button type="submit" class="btn btn-primary">{{__('admin.Yes, Print')}}</button>
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
 
 

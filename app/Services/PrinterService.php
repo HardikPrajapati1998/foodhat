@@ -20,8 +20,13 @@ class PrinterService
 
     protected function formatOrderDetails($order)
     {
+        $printer->setJustification(Printer::JUSTIFY_CENTER);
+        $printer->setEmphasis(true);
+        $printer->text("FoodHat\n");
+        $printer->setEmphasis(false);
+        $printer->setJustification(Printer::JUSTIFY_LEFT);
+
         $output = "";
-        $output .= "FoodHat Name\n";
         $output .= "Customer Details: ". $order->customerDetails ."\n";
         $output .= "-------------------------\n";
         $output .= "Order No: " . $order->id . "\n";
@@ -35,9 +40,17 @@ class PrinterService
         $output .= "Delivery Charge: $" . $order->delivery . "\n";
         $output .= "Total: $" . $order->total . "\n";
         $output .= "-------------------------\n";
-        $output .= "Thank you!\n";
 
-        return $output;
+        $printer->text($output);
+
+        // Center and bold the "Thank you!" text
+        $printer->setJustification(Printer::JUSTIFY_CENTER);
+        $printer->setEmphasis(true);
+        $printer->text("Thank you!\n");
+        $printer->setEmphasis(false);
+        $printer->setJustification(Printer::JUSTIFY_LEFT);
+
+        return $printer;
     }
 
     public function printToKitchen($order)
@@ -49,7 +62,7 @@ class PrinterService
             $connector = new WindowsPrintConnector($this->kitchenPrinter);
             $printer = new Printer($connector);
 
-            $printer->text($this->formatOrderDetails($order));
+            $printer->text($this->formatOrderDetails($printer,$order));
             $printer->cut();
             $printer->close();
             return "Order successfully sent to kitchen printer.";
@@ -68,7 +81,7 @@ class PrinterService
             $connector = new WindowsPrintConnector($this->deskPrinter);
             $printer = new Printer($connector);
 
-            $printer->text($this->formatOrderDetails($order));
+            $printer->text($this->formatOrderDetails($printer,$order));
             $printer->cut();
             $printer->close();
             return "Order successfully sent to desk printer.";
