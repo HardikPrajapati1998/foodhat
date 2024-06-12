@@ -12,16 +12,16 @@ use App\Models\GoogleRecaptcha;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Rules\Captcha;
-use Auth;
 use Hash;
 use App\Mail\UserForgetPassword;
 use App\Helpers\MailHelper;
 use App\Models\EmailTemplate;
 use App\Models\SocialLoginInformation;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
 use Mail;
 use Str;
 use Validator,Redirect,Response,File;
-use Socialite;
 use Carbon\Carbon;
 class LoginController extends Controller
 {
@@ -73,6 +73,12 @@ class LoginController extends Controller
                 $notification = array('messege'=>$notification,'alert-type'=>'error');
                 return redirect()->back()->with($notification);
             }
+//            check if phone is empty then redirect to update phone page
+            if($user->mobile == ''){
+                session()->put('user-phone', $user);
+                return redirect()->route('auth.update-phone');
+            }
+
             if($user->status==1){
                 if(Hash::check($request->password,$user->password)){
                     if(Auth::guard('web')->attempt($credential,$request->remember)){
@@ -196,31 +202,9 @@ class LoginController extends Controller
         return redirect()->route('login')->with($notification);
     }
 
-    public function redirectToGoogle(){
-        SocialLoginInformation::setGoogleLoginInfo();
-        return Socialite::driver('google')->redirect();
-    }
 
-    public function googleCallBack(){
-        SocialLoginInformation::setGoogleLoginInfo();
-        $user = Socialite::driver('google')->user();
-        $user = $this->createUser($user,'google');
-        auth()->login($user);
-        return redirect()->intended(route('user.dashboard'));
-    }
 
-    public function redirectToFacebook(){
-        SocialLoginInformation::setFacebookLoginInfo();
-        return Socialite::driver('facebook')->redirect();
-    }
 
-    public function facebookCallBack(){
-        SocialLoginInformation::setFacebookLoginInfo();
-        $user = Socialite::driver('facebook')->user();
-        $user = $this->createUser($user,'facebook');
-        auth()->login($user);
-        return redirect()->intended(route('user.dashboard'));
-    }
 
 
 
@@ -232,11 +216,45 @@ class LoginController extends Controller
                 'email'    => $getInfo->email,
                 'provider' => $provider,
                 'provider_id' => $getInfo->id,
-                'provider_avatar' => $getInfo->avatar,
+                'mobile' => '',
                 'status' => 1,
                 'email_verified' => 1,
             ]);
         }
         return $user;
     }
+
+    public function google_callback(){
+        $user = Socialite::driver('google')->user();
+        $existUser = User::where('email', $user->email)->first();
+        if($existUser) {
+            Auth::login($existUser);
+            return redirect($this->redirectTo);
+        }else {
+            $this->createUser($user,'google');
+//            save the user to session
+            session()->put('user-phone', $user);
+            return redirect()->route('auth.update-phone');
+        }
+
+    }
+
+    public function facebook_callback(){
+        $user = Socialite::driver('facebook')->user();
+        $existUser = User::where('email', $user->email)->first();
+        if($existUser) {
+            Auth::login($existUser);
+            return redirect($this->redirectTo);
+        }else {
+            $this->createUser($user,'facebook');
+//            save the user to session
+            session()->put('user-phone', $user);
+            return redirect()->route('auth.update-phone');
+        }
+    }
+
+
+
+
+
 }

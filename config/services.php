@@ -35,4 +35,10 @@ return [
         'kitchen' => env('KITCHEN_PRINTER_IP'),
         'desk' => env('DESK_PRINTER_IP'),
     ],
+
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI'),
+    ]
 ];
