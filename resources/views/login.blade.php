@@ -101,13 +101,23 @@
                                 </div>
                             </div>
                         </form>
-                        <form id="registerForm">
+
                             <div class="col-xl-12">
-                                <div class="tf__login_imput">
-                                    <button onclick="googleSignIn()" type="button" class="common_btn">Sign in with Google</button>
+                                <div class="tf__login_imput w-100">
+                                    <a href="{{route('auth.google')}}" class="common_btn w-100 text-center text-white" >
+                                        Login with Google
+                                    </a>
                                 </div>
                             </div>
-                        </form>
+
+                        <div class="col-xl-12">
+                            <div class="tf__login_imput w-100">
+                                <a href="{{route('auth.facebook')}}" class="common_btn w-100 text-center text-white" >
+                                    Login with Facebook
+                                </a>
+                            </div>
+                        </div>
+
 
                         <p class="create_account">{{__('user.Do not have an account ?')}} <a href="{{ route('register') }}">{{__('user.Register here')}}</a>
                     </div>
@@ -133,28 +143,6 @@
                         </form>
 
 
-     <script>
-         function googleSignIn() {
-            // Replace YOUR_CLIENT_ID with your actual Google client ID
-            var CLIENT_ID = '456750131432-eljd7rh95vadjq5dp7b0omk3kqb0etn7.apps.googleusercontent.com';
-            var appUrl = "{{ env('APP_URL') }}";
-            // Redirect URI where Google will redirect after authentication
-            var REDIRECT_URI = appUrl + '/login-auth/';
 
-            // Scope for accessing user's email address
-            var SCOPE = 'https://www.googleapis.com/auth/userinfo.email';
-
-            // Google OAuth URL
-            var oauthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-            'response_type=token&' +
-            'client_id=' + encodeURIComponent(CLIENT_ID) + '&' +
-            'redirect_uri=' + encodeURIComponent(REDIRECT_URI) + '&' +
-            'scope=' + encodeURIComponent(SCOPE);
-
-            // Redirecting the user to Google authentication
-
-            window.location.href = oauthUrl;
-        }
-     </script>
 
 @endsection

@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WEB\Admin\DashboardController;
 use App\Http\Controllers\WEB\Admin\Auth\AdminLoginController;
@@ -57,6 +59,7 @@ use App\Http\Controllers\WEB\User\PaypalController;
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use Laravel\Socialite\Facades\Socialite;
 
 Route::group(['middleware' => ['demo','XSS']], function () {
 
@@ -396,6 +399,41 @@ Route::group(['as'=> 'admin.', 'prefix' => 'admin'],function (){
 
 });
 
+
+Route::get('/auth/google/callback', [LoginController::class, 'google_callback']);
+
+Route::get('/auth/google', function () {
+
+    return Socialite::driver('google')->redirect();
+})->name('auth.google');
+
+
+Route::get('/auth/facebook/callback', [LoginController::class, 'facebook_callback']);
+
+Route::get('/auth/facebook', function () {
+
+    return Socialite::driver('facebook')->redirect();
+})->name('auth.facebook');
+
+Route::get('/auth/update-phone', function (){
+    return view('phone_number');
+})->name('auth.update-phone');
+
+Route::post('/auth/store-phone', function (Request $request){
+
+$user = session()->get('user-phone');
+$request->validate([
+    'mobile' => 'required|numeric'
+]);
+$user = User::where('email', $user->email)->first();
+$user->phone = $request->mobile;
+$user->save();
+Auth::login($user);
+session()->forget('user-phone');
+return redirect()->route('dashboard');
+
+
+})->name('auth.store-phone');
 
 
 

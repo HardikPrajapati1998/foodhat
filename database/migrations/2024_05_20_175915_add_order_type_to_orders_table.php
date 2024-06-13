@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->string('order_type')->after('order_status')->default('Pickup');;
-        });
+//        Schema::table('orders', function (Blueprint $table) {
+//            $table->string('order_type')->after('order_status')->default('Pickup');;
+//        });
     }
 
     /**
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->dropColumn('order_type');
-        });
+//        Schema::table('orders', function (Blueprint $table) {
+//            $table->dropColumn('order_type');
+//        });
     }
 };
